@@ -1,0 +1,32 @@
+postgresql:
+  enabled: false
+
+global:
+  database:
+    type: external
+
+    # -- Secret name where database credentials are stored
+    secretName: "" # e.g. "airbyte-config-secrets"
+
+    # -- The database host
+    host: ""
+    # -- The key within `secretName` where host is stored 
+    #hostSecretKey: "" # e.g. "database-host"
+
+    # -- The database port
+    port: ""
+    # -- The key within `secretName` where port is stored 
+    #portSecretKey: "" # e.g. "database-port" 
+
+    # -- The database name
+    database: ""
+    # -- The key within `secretName` where the database name is stored 
+    #databaseSecretKey: "" # e.g. "database-name" 
+
+    # -- The database user
+    user: ""
+    # -- The key within `secretName` where the user is stored 
+    #userSecretKey: "" # e.g. "database-user"
+
+    # -- The key within `secretName` where password is stored
+    passwordSecretKey: "" # e.g."database-password"

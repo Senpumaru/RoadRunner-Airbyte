@@ -1,0 +1,89 @@
+version: '3'
+
+services:
+  airbyte-server:
+    image: airbyte/airbyte-server:latest
+    container_name: airbyte-server
+    environment:
+      - DATABASE_USER=roadrunner
+      - DATABASE_PASSWORD=roadrunner
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/roadrunner
+      - WORKSPACE_ROOT=/data
+      - CONFIG_ROOT=/config
+      - TRACKING_STRATEGY=logging
+      - LOG_LEVEL=INFO
+    volumes:
+      - airbyte-data:/data
+      - airbyte-config:/config
+
+    networks:
+      - roadrunner-network
+
+  airbyte-worker:
+    image: airbyte/airbyte-worker:latest
+    container_name: airbyte-worker
+    environment:
+      - DATABASE_USER=roadrunner
+      - DATABASE_PASSWORD=roadrunner
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/roadrunner
+      - WORKSPACE_ROOT=/data
+      - CONFIG_ROOT=/config
+      - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
+      - LOG_LEVEL=INFO
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - airbyte-data:/data
+      - airbyte-config:/config
+
+    networks:
+      - roadrunner-network
+
+  airbyte-scheduler:
+    image: airbyte/airbyte-scheduler:latest
+    container_name: airbyte-scheduler
+    environment:
+      - DATABASE_USER=airbyte
+      - DATABASE_PASSWORD=roadrunner
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/roadrunner
+      - WORKSPACE_ROOT=/data
+      - CONFIG_ROOT=/config
+      - LOG_LEVEL=INFO
+    volumes:
+      - airbyte-data:/data
+      - airbyte-config:/config
+
+    networks:
+      - roadrunner-network
+
+  airbyte-webapp:
+    image: airbyte/webapp:latest
+    container_name: airbyte-webapp
+    ports:
+      - "8070:80"
+    environment:
+      - AIRBYTE_API_SERVER_URL=http://airbyte-server:8001
+
+    networks:
+      - roadrunner-network
+
+  airbyte-temporal:
+    image: airbyte/temporal:latest
+    container_name: airbyte-temporal
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=roadrunner
+      - POSTGRES_PWD=roadrunner
+      - POSTGRES_SEEDS=roadrunner
+      - LOG_LEVEL=INFO
+    networks:
+      - roadrunner-network
+
+volumes:
+  airbyte-db-data:
+  airbyte-data:
+  airbyte-config:
+
+networks:
+  roadrunner-network:
+    external: true
